@@ -89,4 +89,3 @@ It contains common setup for both indy-plenum and indy-node.
 
 
 
-aaa
