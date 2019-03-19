@@ -1,7 +1,11 @@
 #!groovy
 
 // TODO remove after shared libs refactoring
-@Library('SovrinHelpers@v1.2.1') _
+//@Library('SovrinHelpers@v1.2.1') _
+library(identifier: 'sovrin@INDY-1992-new-release-logic', retriever: modernSCM(
+    github(credentialsId: 'andkononykhin-github-user-token', repoOwner: 'andkononykhin', repository: 'jenkins-shared')
+))
+
 
 def name = 'indy-plenum'
 
@@ -200,8 +204,10 @@ def stateTestWindowsNoDocker = {
     }
 }
 
-def buildDebUbuntu = { repoName, releaseVersion, sourcePath ->
+def buildDebUbuntu = { repoName, releaseVersion, sourcePath, packageVersion=null ->
     def volumeName = "$name-deb-u1604"
+    packageVersion = packageVersion ?: releaseVersion
+
     if (env.BRANCH_NAME != '' && env.BRANCH_NAME != 'master') {
         volumeName = "${volumeName}.${BRANCH_NAME}"
     }
@@ -209,13 +215,33 @@ def buildDebUbuntu = { repoName, releaseVersion, sourcePath ->
         sh "docker volume rm $volumeName"
     }
     dir('build-scripts/ubuntu-1604') {
-        sh "./build-$name-docker.sh \"$sourcePath\" $releaseVersion $volumeName"
+        sh "./build-$name-docker.sh \"$sourcePath\" $releaseVersion $volumeName $packageVersion"
         sh "./build-3rd-parties-docker.sh $volumeName"
     }
     return "$volumeName"
 }
 
-def options = new TestAndPublishOptions()
+def options = TestAndPublishOptions
+options.skip([StagesEnum.IS_TESTED])
+options.skip([StagesEnum.STATIC_CODE_VALIDATION])
+options.skip([StagesEnum.TEST])
+options.skip([StagesEnum.AUTOMERGE])
+options.skip([StagesEnum.BUILD_RESULT_NOTIF])
+options.skip([StagesEnum.PYPI_RELEASE])
+options.skip([StagesEnum.GET_RELEASE_VERSION])
+options.skip([StagesEnum.PACK_RELEASE])
+options.skip([StagesEnum.QA_NOTIF])
+options.skip([StagesEnum.QA_APPROVAL])
+
+
+options.setApprovers(['QA'])
+options.setReleaseBranch('stable2')
+options.releaseVersion = [
+    release: '1.7.0',
+    pre: 'rc',
+    revision: '1'
+]
+
 options.setPrContexts([env.INDY_GITHUB_PR_REQUIRED_CONTEXT ?: "ci/hyperledger-jenkins/pr-merge"])
 testAndPublish(
     name,
@@ -226,5 +252,5 @@ testAndPublish(
         ledger: ledgerTestUbuntu,
         stp: stpTestUbuntu]
     ],
-    true, options, [ubuntu: buildDebUbuntu]
+    true, options, [ubuntu: buildDebUbuntu], 'plenum'
 )
