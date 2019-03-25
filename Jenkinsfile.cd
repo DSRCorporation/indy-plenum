@@ -234,8 +234,23 @@ options.skip([StagesEnum.IS_TESTED])
 options.skip([StagesEnum.STATIC_CODE_VALIDATION])
 options.skip([StagesEnum.TEST])
 options.skip([StagesEnum.AUTOMERGE])
-options.skip([StagesEnum.BUILD_RESULT_NOTIF])
-options.skip([StagesEnum.QA_NOTIF])
+//options.skip([StagesEnum.BUILD_RESULT_NOTIF])
+//options.skip([StagesEnum.QA_NOTIF])
+
+options.setNotifEmails([
+    QA: [
+        to: "andkononykhin@gmail.com",
+        cc: "${env.INDY_NODE_DEFAULT_RECIPIENTS}"
+    ],
+    success: [
+        to: "andkononykhin@gmail.com",
+        cc: "andrey.kononykhin@dsr-corporation.com",
+    ],
+    fail: [
+        to: "andkononykhin@gmail.com",
+        cc: "andrey.kononykhin@dsr-corporation.com",
+    ]
+])
 
 options.setPkgName(pkgName)
 
