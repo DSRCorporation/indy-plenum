@@ -228,6 +228,20 @@ def buildDebUbuntu = { releaseVersion, sourcePath, packageVersion=null, missedPk
 def options = new TestAndPublishOptions()
 // TODO review that
 options.setApprovers(['QA'])
+options.setNotifEmails([
+    QA: [
+        to: "andkononykhin@gmail.com",
+        cc: "${env.INDY_NODE_DEFAULT_RECIPIENTS}"
+    ],
+    success: [
+        to: "andkononykhin@gmail.com",
+        cc: "andrey.kononykhin@dsr-corporation.com",
+    ],
+    fail: [
+        to: "andkononykhin@gmail.com",
+        cc: "andrey.kononykhin@dsr-corporation.com",
+    ]
+])
 options.setPkgName(pkgName)
 
 // TODO duplicates list from build scripts
