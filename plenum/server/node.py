@@ -2167,7 +2167,13 @@ class Node(HasActionQueue, Motor, Propagator, MessageProcessor, HasFileStorage,
         r = self.master_replica.revert_unordered_batches()
         logger.info('{} reverted {} batches before starting catch up for ledger {}'.format(self, r, ledger_id))
 
+        if len(self.auditLedger.uncommittedTxns) > 0:
+            raise LogicError('{} audit ledger has uncommitted txns before catching up ledger {}'.format(self, ledger_id))
+
     def postLedgerCatchUp(self, ledger_id, last_caughtup_3pc):
+        if len(self.auditLedger.uncommittedTxns) > 0:
+            raise LogicError('{} audit ledger has uncommitted txns after catching up ledger {}'.format(self, ledger_id))
+
         # update 3PC key interval tree to return last ordered to other nodes in Ledger Status
         self._update_txn_seq_range_to_3phase_after_catchup(ledger_id, last_caughtup_3pc)
 
@@ -3264,12 +3270,12 @@ class Node(HasActionQueue, Motor, Propagator, MessageProcessor, HasFileStorage,
 
         if ledger_id in self.txn_seq_range_to_3phase_key:
             # point query in interval tree
-            tuple = self.txn_seq_range_to_3phase_key[ledger_id]
-            # tuple[1] stands for last freshness batch
-            if tuple[1] is not None:
-                return tuple[1]
+            pair_3pc = self.txn_seq_range_to_3phase_key[ledger_id]
+            # pair_3pc[1] stands for last freshness batch
+            if pair_3pc[1] is not None:
+                return pair_3pc[1]
             else:
-                s = tuple[0][seq_no]
+                s = pair_3pc[0][seq_no]
 
             if s:
                 # There should not be more than one interval for any seq no in

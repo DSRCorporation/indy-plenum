@@ -232,9 +232,10 @@ options.skip([StagesEnum.IS_TESTED])
 options.skip([StagesEnum.STATIC_CODE_VALIDATION])
 options.skip([StagesEnum.TEST])
 options.skip([StagesEnum.AUTOMERGE])
+options.skip([StagesEnum.PYPI_RELEASE])
 options.skip([StagesEnum.PACK_RELEASE])
 options.skip([StagesEnum.PACK_RELEASE_COPY])
-options.skip([StagesEnum.SYSTEM_TESTS]
+options.skip([StagesEnum.SYSTEM_TESTS])
 
 
 env.INDY_NODE_QA_RECIPIENTS = 'andkononykhin@gmail.com'
